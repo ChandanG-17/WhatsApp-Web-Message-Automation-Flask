@@ -10,6 +10,10 @@ import pandas as pd
 import keyboard as k
 from urllib.parse import quote
 from pyngrok import ngrok
+from dotenv import load_dotenv
+
+# Load .env file
+load_dotenv()
 
 app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
@@ -18,7 +22,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
 # Set your Groq API key here or via environment variable
-GROQ_API_KEY = os.getenv("GROQ_API_KEY", "Give_your_API_KEY") # Give your Groq API key here
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 # In-memory store
