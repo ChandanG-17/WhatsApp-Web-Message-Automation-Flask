@@ -1,9 +1,12 @@
-Flask
-pandas
-urllib.parse
-pandas
-tempfile
-requests
-keyboard
-pyautogui
-webbrowser
+Flask==3.1.1
+groq==0.31.0
+keyboard==0.13.5
+ngrok==1.4.0
+pandas==2.2.3
+pyngrok==7.2.12
+twilio==9.7.0
+urllib3==2.5.0
+pyautogui ==0.9.53
+python-dotenv==1.0.0
+requests==2.32.3
+webbrowser==0.0.8
