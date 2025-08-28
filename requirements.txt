@@ -1,0 +1,9 @@
+Flask
+pandas
+urllib.parse
+pandas
+tempfile
+requests
+keyboard
+pyautogui
+webbrowser

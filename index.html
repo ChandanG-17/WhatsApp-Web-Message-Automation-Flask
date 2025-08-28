@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>WhatsApp Web Messaging Automation</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+</head>
+<body>
+  <div class="container">
+    <h1>WhatsApp Web Message Automation</h1>
+
+    <form id="genForm" class="form" enctype="multipart/form-data">
+  <label class="label">Choose Mode</label>
+  <div>
+    <input type="radio" name="mode" value="manual" id="modeManual" checked>
+    <label for="modeManual">Manual Message</label>
+    <input type="radio" name="mode" value="ai" id="modeAI">
+    <label for="modeAI">AI Generated (Groq)</label>
+  </div>
+
+  <div id="manualBox">
+    <label class="label">Enter Your Message</label>
+    <textarea name="manual_message" id="manualMessage" placeholder="Type your WhatsApp message here"></textarea>
+  </div>
+
+  <div id="aiBox" style="display:none;">
+    <label class="label">Message Idea / Prompt</label>
+    <textarea name="prompt" id="prompt" placeholder="e.g. festival wishes for Diwali and 25% discount"></textarea>
+
+  </div>
+
+  <label class="label">Upload Excel File (Name, PhoneNumber)</label>
+      <input type="file" name="file" id="file" accept=".xls,.xlsx" required />
+
+  <button class="btn primary" type="submit" id="generateBtn">Generate Messages</button>
+</form>
+  
+    <div id="previewArea" class="preview" style="display:none;">
+      <h2>Message Preview</h2>
+      <div id="previewText" class="preview-text"></div>
+      <textarea id="editBox" style="display:none; width:100%; height:120px;"></textarea>
+      <p class="note" style="color: red;">You can edit the message before sending.</p>
+      <button class="btn secondary" id="editBtn">Edit Message</button>  
+      <button class="btn secondary" id="saveBtn" style="display:none;">Save</button>
+    </div>
+
+
+    <div id="messagesArea" class="generated" style="display:none;">
+      <div class="generated-header">
+        <h2>Generated Messages</h2>
+        <button class="btn send-all" id="sendAllBtn">Send All</button>
+      </div>
+      <div id="messageList" class="message-list"></div>
+    </div>
+  </div>
+
+<script>
+  const form = document.getElementById('genForm');
+  const previewArea = document.getElementById('previewArea');
+  const previewText = document.getElementById('previewText');
+  const messagesArea = document.getElementById('messagesArea');
+  const messageList = document.getElementById('messageList');
+  const editBtn = document.getElementById('editBtn');
+  const saveBtn = document.getElementById('saveBtn');
+  const editBox = document.getElementById('editBox');
+  let currentMessage = "";
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('generateBtn');
+    btn.disabled = true;
+    btn.textContent = 'Processing...';
+
+    const fd = new FormData(form);
+    const mode = fd.get('mode');  // manual or ai
+
+    const res = await fetch('/generate_message', { method: 'POST', body: fd });
+    btn.disabled = false;
+    btn.textContent = 'Generate Messages';
+
+    if (!res.ok) {
+      const err = await res.json().catch(()=>({error:'Unknown error'}));
+      alert('Error: ' + (err.error || 'Unable to process'));
+      return;
+    }
+
+    const data = await res.json();
+    currentMessage = data.preview;
+
+    // Show preview
+    previewText.textContent = currentMessage;
+    previewArea.style.display = 'block';
+
+    // Populate messages
+    messageList.innerHTML = '';
+    data.messages.forEach((m) => {
+      const card = document.createElement('div');
+      card.className = 'message-card';
+      card.innerHTML = `
+        <div class="meta"><strong>${m.name || 'Contact'}</strong> (${m.phone})</div>
+        <div class="text">${m.message}</div>
+        <div class="actions"><button class="btn small" data-phone="${m.phone}" data-message="${encodeURIComponent(m.message)}">Send</button></div>
+      `;
+      messageList.appendChild(card);
+    });
+    messagesArea.style.display = 'block';
+  });
+
+  // --- Edit functionality ---
+  editBtn.addEventListener('click', () => {
+    editBox.value = currentMessage;
+    previewText.style.display = 'none';
+    editBox.style.display = 'block';
+    editBtn.style.display = 'none';
+    saveBtn.style.display = 'inline-block';
+  });
+
+  saveBtn.addEventListener('click', () => {
+    currentMessage = editBox.value;
+    previewText.textContent = currentMessage;
+    previewText.style.display = 'block';
+    editBox.style.display = 'none';
+    editBtn.style.display = 'inline-block';
+    saveBtn.style.display = 'none';
+
+    // Update all send buttons with edited message
+    document.querySelectorAll('.btn.small').forEach(btn => {
+      btn.setAttribute('data-message', encodeURIComponent(currentMessage));
+    });
+  });
+
+  // --- Send All ---
+  document.getElementById('sendAllBtn').addEventListener('click', async (e) => {
+    e.preventDefault();
+    const btn = e.target;
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+
+    const formData = new URLSearchParams();
+    formData.append('message', currentMessage);
+
+    const res = await fetch('/send_all', { 
+      method: 'POST', 
+      headers: { 'Content-Type':'application/x-www-form-urlencoded' },
+      body: formData.toString()
+    });
+
+    btn.disabled = false;
+    btn.textContent = 'Send All';
+    const data = await res.json();
+    if (data.error) {
+      alert('Error: ' + data.error);
+    } else {
+      alert('All messages sent successfully!');
+    }
+  });
+
+  // --- Send One ---
+  document.addEventListener('click', async (e) => {
+    if (e.target && e.target.matches('.btn.small')) {
+      const phone = e.target.getAttribute('data-phone');
+      const message = decodeURIComponent(e.target.getAttribute('data-message'));
+      e.target.disabled = true;
+      e.target.textContent = 'Sending...';
+      const form = new URLSearchParams();
+      form.append('phone', phone);
+      form.append('message', message);
+      const res = await fetch('/send_one', { 
+        method: 'POST', 
+        headers: {'Content-Type':'application/x-www-form-urlencoded'}, 
+        body: form.toString() 
+      });
+      e.target.disabled = false;
+      e.target.textContent = 'Send';
+      const data = await res.json();
+      if (data.error) alert('Error: ' + data.error);
+      else alert('Result: ' + (data.status || 'ok'));
+    }
+  });
+
+  // Toggle between manual and AI input
+  document.querySelectorAll('input[name="mode"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      const manualBox = document.getElementById('manualBox');
+      const aiBox = document.getElementById('aiBox');
+      if (document.getElementById('modeManual').checked) {
+        manualBox.style.display = 'block';
+        aiBox.style.display = 'none';
+      } else {
+        manualBox.style.display = 'none';
+        aiBox.style.display = 'block';
+      }
+    });
+  });
+</script>
+</body>
+</html>

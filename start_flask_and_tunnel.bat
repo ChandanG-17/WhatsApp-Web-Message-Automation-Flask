@@ -1,0 +1,9 @@
+@echo off
+echo Starting Flask app...
+start "" cmd /k "python app.py"
+
+echo Waiting for Flask to boot...
+timeout /t 5 >nul
+
+echo Starting Cloudflare Tunnel...
+cloudflared tunnel --url http://localhost:5000

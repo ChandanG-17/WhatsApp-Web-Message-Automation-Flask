@@ -1,0 +1,140 @@
+:root{
+  --green:#16703b;
+  --darkgreen:#116033;
+  --gold:#f0b400;
+}
+
+body{
+  font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+  background: url("https://i.pinimg.com/736x/8c/98/99/8c98994518b575bfd8c949e91d20548b.jpg") no-repeat center center fixed;
+  background-size: cover;
+  margin:0;
+  padding:30px;
+}
+
+.container{
+  max-width:1000px;
+  margin:0 auto;
+}
+
+h1{
+  font-size:28px;
+  margin-bottom:12px;
+  text-align: center;
+}
+
+.form{
+  background:rgb(245, 217, 217);
+  padding:18px;
+  border-radius:20px;
+  box-shadow:0 1px 2px rgba(0,0,0,0.05);
+  margin-bottom:12px;
+}
+
+.label{
+  display:block;
+  margin-top:8px;
+  font-weight:600;
+  color:#333;
+}
+
+textarea{
+  width:97%;
+  min-height:80px;
+  padding:10px;
+  border-radius:6px;
+  border:1px solid #e0e0e0;
+  resize:vertical;
+  margin-top:6px;
+}
+
+input[type="file"]{
+  margin-top:10px;
+}
+
+.btn{
+  display:list-item;
+  border:none;
+  padding:10px 16px;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.btn.primary{
+  background:var(--green);
+  color:white;
+  margin-top:12px;
+}
+.btn.secondary{
+  background:var(--green);
+  color:white;
+  margin-top:8px;
+}
+.btn.secondary:hover{
+  background:var(--darkgreen);
+  color:white;
+}
+
+.btn.send-all{
+  background:var(--gold);
+  color:#333;
+  border-radius:6px;
+  padding:8px 12px;
+}
+
+.preview{
+  background:rgb(245, 217, 217);
+  padding:12px;
+  border-radius:6px;
+  margin-bottom:12px;
+  box-shadow:0 1px 2px rgba(0,0,0,0.04);
+}
+
+.preview-text{
+  font-size:16px;
+  color:#222;
+}
+
+.generated{
+  background:white;
+  border-radius:6px;
+  overflow:hidden;
+  box-shadow:0 1px 2px rgba(0,0,0,0.05);
+}
+
+.generated-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 18px;
+  background:var(--green);
+  color:white;
+}
+
+.message-list{
+  padding:14px;
+}
+
+.message-card{
+  border:1px solid #eee;
+  padding:12px;
+  border-radius:6px;
+  margin-bottom:10px;
+  background:#f6dede;
+}
+
+.message-card .meta{
+  font-weight:600;
+  margin-bottom:6px;
+}
+
+.message-card .text{
+  margin-bottom:8px;
+}
+
+.btn.small{
+  padding:6px 10px;
+  background:var(--darkgreen);
+  color:white;
+  border-radius:6px;
+}
